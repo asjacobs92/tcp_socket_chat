@@ -88,7 +88,6 @@ void *server(void *arg)
 				printf("There was an Error reading from socket\n");
 				exit(-1);
 			}
-			//system("aplay -q ../res/beep.wav");
 			printf("%s\n", buffer);
 		}
 		pthread_mutex_unlock(&client_m);

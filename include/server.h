@@ -73,7 +73,7 @@ void list_users(client_t *user);
 void leave_room(client_t *user);
 void help_client(client_t *user);
 void join_room(client_t *user, char *name);
-void create_room(char *name, int max_users);
+void create_room(client_t *user, char *name, int max_users); // Cria sala
 
 int was_user_pvt_requested(char *nick);
 void join_pvt_room(client_t *user);

@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 
 	listen(sockfd, 5);
 	puts("Listening...");
-	create_room(MAIN_ROOM, DEFAULT_ROOM_SIZE);
+	create_room(NULL, MAIN_ROOM, DEFAULT_ROOM_SIZE);
 
 	char buffer[DEFAULT_BUFFER_SIZE];
 	while (1)
@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-int is_str_empty(const char* str)
+int is_str_empty(const char* str) // Checa se uma string esta vazia, se sim retorna 1, senao 0
 {
 	int i = 0;
 	int empty = 1;
@@ -72,7 +72,7 @@ int is_str_empty(const char* str)
 	{
 		if (str != NULL && str[i] != ' ')
 		{
-			empty = 0;
+			empty = 0; // Quando nao esta vazio
 		}
 		i++;
 	}
@@ -81,15 +81,15 @@ int is_str_empty(const char* str)
 	return empty;
 }
 
-int str_starts_with(const char *prefix, const char *str)
+int str_starts_with(const char *prefix, const char *str) // Checa se a string string str ´e igual a prefix, se for retorna 1
 {
 	int starts_with;
 
-	starts_with = strncmp(prefix, str, strlen(prefix));
+	starts_with = strncmp(prefix, str, strlen(prefix)); //comparacao
 	return starts_with == 0;
 }
 
-int str_starts_with_nick(client_t *user, const char *str)
+int str_starts_with_nick(client_t *user, const char *str) // Checa se a string ´e igual a algum nome dos clientes daquela sala, se sim retorna 1
 {
 	room_t *room = user->room;
 	int i;
@@ -102,7 +102,7 @@ int str_starts_with_nick(client_t *user, const char *str)
 			strcat(prefix, "/");
 			strcat(prefix, room->users[i]->name);
 			strcat(prefix, " ");
-			int starts_with = strncmp(prefix, str, strlen(prefix));
+			int starts_with = strncmp(prefix, str, strlen(prefix)); //Compara todos os nomes de clientes da sala tirando o do proprio chamador
 			if (starts_with == 0)
 			{
 				return 1;
@@ -112,7 +112,7 @@ int str_starts_with_nick(client_t *user, const char *str)
 	return 0;
 }
 
-void reply(client_t *user, char* msg)
+void reply(client_t *user, char* msg) // Envia mensagem do servidor para o cliente em especifico
 {
 	char buffer[DEFAULT_BUFFER_SIZE];
 
@@ -126,7 +126,7 @@ void reply(client_t *user, char* msg)
 	}
 }
 
-void reply_all(client_t *user, char* msg)
+void reply_all(client_t *user, char* msg) // Envia mensagem do servidor para todos os clientes daquela sala
 {
 	room_t *room = user->room;
 
@@ -143,7 +143,7 @@ void reply_all(client_t *user, char* msg)
 			if (room->users[i] != NULL)
 			{
 				bzero(buffer, DEFAULT_BUFFER_SIZE);
-				snprintf(buffer, DEFAULT_BUFFER_SIZE, "%s[Administrator@%s]: %s%s", color_red, room->name, msg, room->users[i]->color);
+				snprintf(buffer, DEFAULT_BUFFER_SIZE, "%s[Administrator@%s]: %s%s", color_red, room->name, msg, room->users[i]->color); //mensagem do SRV vai para todos os clientes da sala
 				write(room->users[i]->socket, buffer, sizeof(buffer));
 			}
 		}
@@ -151,7 +151,7 @@ void reply_all(client_t *user, char* msg)
 	pthread_mutex_unlock(&client_m);
 }
 
-void send_message_to_all(client_t *user, char *msg)
+void send_message_to_all(client_t *user, char *msg) // Envia mensagem do cliente para todos os presentes naquela sala
 {
 	room_t *room = user->room;
 	char buffer[DEFAULT_BUFFER_SIZE];
@@ -173,7 +173,7 @@ void send_message_to_all(client_t *user, char *msg)
 	pthread_mutex_unlock(&client_m);
 }
 
-void send_message_to_user(client_t *user, char *msg, char *nick)
+void send_message_to_user(client_t *user, char *msg, char *nick) // Envia mensagem para usuario especifico se ele estiver presente na sala
 {
 	room_t *room = user->room;
 	char buffer[DEFAULT_BUFFER_SIZE];
@@ -195,7 +195,7 @@ void send_message_to_user(client_t *user, char *msg, char *nick)
 	pthread_mutex_unlock(&client_m);
 }
 
-void help_user(client_t *user)
+void help_user(client_t *user) // Emite lista de comandos ao cliente
 {
 	char buffer[DEFAULT_BUFFER_SIZE];
 	int offset = 0;
@@ -208,9 +208,9 @@ void help_user(client_t *user)
 	offset += sprintf(buffer + offset, "%s\n", "   /list_users          -  Lists all users in the room.");
 	offset += sprintf(buffer + offset, "%s\n", "   /join <room_name>    -  Leaves current room and joing room with given name.");
 	offset += sprintf(buffer + offset, "%s\n", "   /create <room_name>  -  Creates room with the given name, for up to 50 users.");
-	offset += sprintf(buffer + offset, "%s\n", "   /nick <new_nickname>	-  Changes current nickname to given nickname.");
-	offset += sprintf(buffer + offset, "%s\n", "   /<nickname> <msg>		-  Sends private massege to user with given nickname.");
-	offset += sprintf(buffer + offset, "%s\n", "   /pvt <nickname>			-  Sends a request for a private conversation to given user.");
+	offset += sprintf(buffer + offset, "%s\n", "   /nick <new_nickname> -  Changes current nickname to given nickname.");
+	offset += sprintf(buffer + offset, "%s\n", "   /<nickname> <msg>    -  Sends private massege to user with given nickname.");
+	offset += sprintf(buffer + offset, "%s\n", "   /pvt <nickname>      -  Sends a request for a private conversation to given user.");
 	offset += sprintf(buffer + offset, "%s\n", "   /leave               -  Leaves current room and goes back to the Lobby.");
 	offset += sprintf(buffer + offset, "%s\n", "   /exit                -  Exits chat.");
 	offset += sprintf(buffer + offset, "%s", "============================");
@@ -218,7 +218,7 @@ void help_user(client_t *user)
 	reply(user, buffer);
 }
 
-void list_rooms(client_t *user)
+void list_rooms(client_t *user) // Lista todas as salas disponiveis
 {
 	char buffer[DEFAULT_BUFFER_SIZE];
 	int offset = 0;
@@ -240,7 +240,7 @@ void list_rooms(client_t *user)
 	reply(user, buffer);
 }
 
-void list_users(client_t *user)
+void list_users(client_t *user) //Lista todos os usuarios da sala
 {
 	room_t *room = user->room;
 	char buffer[DEFAULT_BUFFER_SIZE];
@@ -266,7 +266,7 @@ void list_users(client_t *user)
 	reply(user, buffer);
 }
 
-void create_room(char *name, int max_users)
+void create_room(client_t *user, char *name, int max_users) // Cria sala
 {
 	room_t *room = malloc(sizeof(room_t));
 
@@ -290,15 +290,18 @@ void create_room(char *name, int max_users)
 		room_t *it;
 		for (it = rooms; it != NULL; it = it->next)
 		{
-			if (strcmp(it->name, room->name) == 0)
+			if (strcmp(it->name, room->name) == 0)  // Se nome da sala ja existe nao cria
 			{
-				puts("Room already exists. Please try another name.");
+				if (user != NULL)               // se lobby estiver sendo criado, usurio pode NULL
+				{
+					reply(user, "Room already exists. Please try another name.");
+				}
 				//room mutex end
 				pthread_mutex_unlock(&room_m);
 				return;
 			}
 
-			if (it->next == NULL)
+			if (it->next == NULL) //se fim da lista, cria
 			{
 				it->next = room;
 				//room mutex end
@@ -306,12 +309,12 @@ void create_room(char *name, int max_users)
 				return;
 			}
 		}
-		rooms = room;
+		rooms = room; //Se ´e primeiro da lista
 	}
 	pthread_mutex_unlock(&room_m);
 }
 
-void create_pvt_room(client_t *pvt_sndr, char *name, char *receiver_nick)
+void create_pvt_room(client_t *pvt_sndr, char *name, char *receiver_nick) //Cria sala pvt
 {
 	room_t *room = malloc(sizeof(room_t));
 
@@ -338,7 +341,7 @@ void create_pvt_room(client_t *pvt_sndr, char *name, char *receiver_nick)
 		{
 			if (strcmp(it->name, room->name) == 0)
 			{
-				puts("Room already exists. Please try another name.");
+				reply(pvt_sndr, "Room already exists. Please try another name.");
 				//room mutex end
 				pthread_mutex_unlock(&room_m);
 				return;
@@ -357,7 +360,7 @@ void create_pvt_room(client_t *pvt_sndr, char *name, char *receiver_nick)
 	pthread_mutex_unlock(&room_m);
 }
 
-void join_room(client_t *user, char *name)
+void join_room(client_t *user, char *name) // Entra na sala
 {
 	room_t *it;
 	room_t *room_to_join = NULL;
@@ -370,9 +373,9 @@ void join_room(client_t *user, char *name)
 			{
 				if (it->pvt_sender == NULL && it->pvt_receiver_nick == NULL)
 				{
-					if (it->n_users < it->max_users)
+					if (it->n_users < it->max_users)        // Se cabe mais cliente
 					{
-						room_to_join = it; //gets room
+						room_to_join = it;              //gets room
 						break;
 					}
 					else
@@ -384,7 +387,7 @@ void join_room(client_t *user, char *name)
 				}
 				else
 				{
-					reply(user, "Sorry, but that is a private room.");
+					reply(user, "Sorry, but that is a private room."); //Se for pvt nao entra
 					pthread_mutex_unlock(&room_m);
 					return;
 				}
@@ -393,7 +396,7 @@ void join_room(client_t *user, char *name)
 	}
 	pthread_mutex_unlock(&room_m);
 
-	if (room_to_join == NULL)
+	if (room_to_join == NULL) // Se sala nao existe
 	{
 		reply(user, "There is no room with that name.");
 		return;
@@ -405,7 +408,7 @@ void join_room(client_t *user, char *name)
 		int i;
 		for (i = 0; i < room_to_join->max_users; i++)
 		{
-			if (room_to_join->users[i] == NULL)
+			if (room_to_join->users[i] == NULL) //Poe usuario na sala
 			{
 				room_to_join->users[i] = user;
 				user->room = room_to_join;
@@ -430,7 +433,7 @@ void join_pvt_room(client_t *user_rcvr)
 	leave_room(user_rcvr);
 	pthread_mutex_lock(&room_m);
 	{
-		for (it = rooms; it != NULL; it = it->next)
+		for (it = rooms; it != NULL; it = it->next) // Compara de sala em sala qual tem o atributo pvt_reciever_nick igual ao do cliente em questao
 		{
 			if (it->pvt_receiver_nick != NULL)
 			{
@@ -478,7 +481,7 @@ void join_pvt_room(client_t *user_rcvr)
 	return;
 }
 
-void delete_pvt_room(client_t *user_rcvr)
+void delete_pvt_room(client_t *user_rcvr) // Deleta sala pvt
 {
 	room_t *it;
 	room_t *room_to_delete;
@@ -487,11 +490,11 @@ void delete_pvt_room(client_t *user_rcvr)
 	{
 		for (it = rooms; it != NULL; it = it->next)
 		{
-			if (it->pvt_receiver_nick != NULL)
+			if (it->pvt_receiver_nick != NULL || it->pvt_sender != NULL)
 			{
-				if (strcmp(it->pvt_receiver_nick, user_rcvr->name) == 0)
+				if (!(strcmp(it->pvt_receiver_nick, user_rcvr->name)) || !(strcmp(it->pvt_sender->name, user_rcvr->name)))      // Compara com sender e reciever
 				{
-					room_to_delete = it; //gets room
+					room_to_delete = it;                                                                                    //gets room
 					break;
 				}
 			}
@@ -501,7 +504,7 @@ void delete_pvt_room(client_t *user_rcvr)
 	delete_room(room_to_delete);
 }
 
-void leave_room(client_t *user)
+void leave_room(client_t *user) // Sai da sala
 {
 	if (user->room != NULL)
 	{
@@ -523,14 +526,14 @@ void leave_room(client_t *user)
 			}
 		}
 
-		if (room->n_users == 0 && strcmp(room->name, MAIN_ROOM) != 0)
+		if (room->n_users == 0 && strcmp(room->name, MAIN_ROOM) != 0) // Se ´e o ultimo presente na sala, deleta essa sala
 		{
 			delete_room(room);
 		}
 	}
 }
 
-void delete_room(room_t *room)
+void delete_room(room_t *room) // Deleta sala
 {
 	pthread_mutex_lock(&room_m);
 	{
@@ -554,7 +557,7 @@ void delete_room(room_t *room)
 	pthread_mutex_unlock(&room_m);
 }
 
-void exit_chat(client_t *user)
+void exit_chat(client_t *user) // Sai do chat
 {
 	leave_room(user);
 	pthread_mutex_lock(&client_m);
@@ -581,7 +584,7 @@ void exit_chat(client_t *user)
 	pthread_exit(0);
 }
 
-int was_user_pvt_requested(char *nick)
+int was_user_pvt_requested(char *nick) // Ve se o client ja foi requisitado para pvt, se sim, retorna 1
 {
 	int requested = 0;
 	room_t *it;
@@ -604,7 +607,7 @@ int was_user_pvt_requested(char *nick)
 	return requested;
 }
 
-char* get_nick_from_command(client_t *user, const char *str)
+char* get_nick_from_command(client_t *user, const char *str) // Pegar o nick do comando
 {
 	room_t *room = user->room;
 	int i;
@@ -627,7 +630,7 @@ char* get_nick_from_command(client_t *user, const char *str)
 	return NULL;
 }
 
-int is_nick_in_room(client_t *user, const char *nick)
+int is_nick_in_room(client_t *user, const char *nick) //Ve se o nick se encontra, se sim retorna 1
 {
 	room_t *room = user->room;
 	int nick_in_room = 0;
@@ -641,6 +644,10 @@ int is_nick_in_room(client_t *user, const char *nick)
 			strcat(prefix, room->users[i]->name);
 			int starts_with = strncmp(prefix, nick, strlen(prefix));
 			nick_in_room = (starts_with == 0);
+			if (nick_in_room)
+			{
+				return nick_in_room;
+			}
 		}
 	}
 	return nick_in_room;
@@ -696,7 +703,7 @@ void *client(void *arg)
 			char *name = strchr(buffer, ' ') + 1;
 			if (!is_str_empty(name))
 			{
-				create_room(name, DEFAULT_ROOM_SIZE);
+				create_room(user, name, DEFAULT_ROOM_SIZE);
 			}
 			else
 			{
