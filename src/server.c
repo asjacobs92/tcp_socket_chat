@@ -640,7 +640,7 @@ int is_nick_in_room(client_t *user, const char *nick) //Ve se o nick se encontra
 	{
 		if (room->users[i] != NULL && room->users[i] != user)
 		{
-			char prefix[80];
+			char prefix[80] = "";
 			strcat(prefix, room->users[i]->name);
 			int starts_with = strncmp(prefix, nick, strlen(prefix));
 			nick_in_room = (starts_with == 0);
@@ -652,6 +652,7 @@ int is_nick_in_room(client_t *user, const char *nick) //Ve se o nick se encontra
 	}
 	return nick_in_room;
 }
+
 
 void *client(void *arg)
 {
