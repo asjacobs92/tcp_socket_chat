@@ -1,0 +1,112 @@
+-- Objetos a serem gerenciados:
+-- * Endereço do servidor remoto, Escalar read-only
+-- * Porta do servidor remoto, Escalar read-only
+-- * Numero de salas ativas, Escalar read-only
+-- * Numero de usuarios ativos, Escalar read-only
+-- * Numero de conversas privadas ativas, Escalar read-only
+-- * Numero de mensagens enviadas, Escalar read-only
+-- * Numero maximo de usuarios ativos, Escalar read-write
+-- * Salas ativas, Tabela
+-- * Usuarios ativos, Tabela (to-do)
+-- * Conversas privadas ativas, Tabela (to-do)
+
+
+TCPChat-MIB DEFINITIONS ::= BEGIN
+
+  IMPORTS
+		TimeTicks, IpAddress, Counter, OBJECT-TYPE, DisplayString FROM RFC1155-SMI,
+		TCPChatCorp FROM TCPChatCorp-MIB;
+	    tcpChat	OBJECT IDENTIFIER ::= { TCPChatCorp 1 }
+
+      tcpChatServerAddr OBJECT-TYPE
+    		SYNTAX IpAddress
+    		ACCESS read-only
+    		STATUS mandatory
+    		DESCRIPTION "Endereco do servidor remoto de chat"
+    	::= { tcpChat 1 }
+
+      tcpChatServerPort OBJECT-TYPE
+    		SYNTAX Gauge
+    		ACCESS read-only
+    		STATUS mandatory
+    		DESCRIPTION "Porta do servidor remoto de chat"
+    	::= { tcpChat 2 }
+
+      tcpChatActiveRooms OBJECT-TYPE
+    		SYNTAX Gauge
+    		ACCESS read-only
+    		STATUS mandatory
+    		DESCRIPTION "Numero de salas ativas no servidor"
+    	::= { tcpChat 3 }
+
+      tcpChatActiveUsers OBJECT-TYPE
+    		SYNTAX Gauge
+    		ACCESS read-only
+    		STATUS mandatory
+    		DESCRIPTION "Numero de usuarios ativas no servidor"
+    	::= { tcpChat 4 }
+
+      tcpChatActivePvts OBJECT-TYPE
+        SYNTAX Gauge
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION "Numero de conversas privadas ativas no servidor"
+      ::= { tcpChat 5 }
+
+      tcpChatMessagesSent OBJECT-TYPE
+        SYNTAX Counter
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION "Numero de mensagens enviadas ao servidor"
+      ::= { tcpChat 6 }
+
+      tcpChatMaxUsers OBJECT-TYPE
+        SYNTAX INTEGER
+        ACCESS read-write
+        STATUS mandatory
+        DESCRIPTION "Numero maximo permitido de usuarios conectados no servidor"
+      ::= { tcpChat 7 }
+
+      tcpChatRoomTable OBJECT-TYPE
+        SYNTAX  SEQUENCE OF TcpConnEntry
+        ACCESS  not-accessible
+        STATUS  mandatory
+        DESCRIPTION "Tabela contendo as salas ativas no servidor de chat"
+      ::= { tcpChat 8 }
+
+      tcpChatRoomEntry OBJECT-TYPE
+        SYNTAX  TcpChatRoomEntry
+        ACCESS  not-accessible
+        STATUS  mandatory
+        DESCRIPTION "Informacoes sobre uma sala de chat ativa no servidor."
+        INDEX   { tcpChatRoomIndex }
+      ::= { tcpChatRoomTable 1 }
+
+      TcpChatRoomEntry ::=
+        SEQUENCE {
+            tcpChatRoomIndex INTEGER,
+            tcpChatRoomName OCTET STRING,
+            tcpNumUsers INTEGER,
+        }
+
+      tcpChatRoomIndex OBJECT-TYPE
+        SYNTAX INTEGER
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION "Identificador unico incremental de uma sala de chat."
+      ::= { tcpChatRoomEntry 1 }
+
+      tcpChatRoomName OBJECT-TYPE
+        SYNTAX OCTET STRING
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION "Nome de uma sala de chat."
+      ::= { tcpChatRoomEntry 2 }
+
+      tcpNumUsers OBJECT-TYPE
+        SYNTAX INTEGER
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION "Numero de usuario ativos em uma sala de chat."
+      ::= { tcpChatRoomEntry 3 }
+END

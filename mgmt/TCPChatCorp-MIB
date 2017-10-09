@@ -1,0 +1,7 @@
+TCPChatCorp-MIB DEFINITIONS ::= BEGIN
+        IMPORTS
+		-- enterprises  FROM RFC1155-SMI,
+		   experimental FROM RFC1155-SMI;
+	    -- TCPChatCorp OBJECT IDENTIFIER ::= { enterprises  ?? }
+	       TCPChatCorp OBJECT IDENTIFIER ::= { experimental 1 }
+END.
